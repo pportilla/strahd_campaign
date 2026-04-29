@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read/write access to the wiki collection
+    // Adjust this if you want to restrict it to authenticated users only
+    match /wiki/{document=**} {
+      allow read, write: if true;
+    }
+    
+    // Existing rules for other collections (keep these as they are in your console)
+    match /players/{player} {
+      allow read, write: if true;
+    }
+    match /scheduleEntries/{entry} {
+      allow read, write: if true;
+    }
+  }
+}

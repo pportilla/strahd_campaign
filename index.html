@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>La Maldición de Strahd - Planificador</title>
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <style>
+      body {
+        font-family: Georgia, 'Times New Roman', serif;
+        background-color: #0c0a09; /* bg-stone-950 */
+        background-image: url('https://i.ytimg.com/vi/gYHJh1ByptU/maxresdefault.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+      }
+
+      #root {
+        position: relative; /* Establish stacking context */
+        z-index: 1;
+      }
+      
+      /* Add a dark, purplish overlay for atmosphere and readability */
+      body::before {
+        content: '';
+        position: fixed; /* Cover the whole viewport */
+        inset: 0;
+        background-color: rgba(46, 33, 56, 0.75); /* Dark purplish overlay */
+        z-index: 0; /* Sit below #root but above body background */
+      }
+
+      .font-title {
+        font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+      }
+
+      @keyframes pulse-border {
+        0%, 100% { border-color: rgba(220, 38, 38, 0.8); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+        50% { border-color: rgba(220, 38, 38, 1); box-shadow: 0 0 10px 5px rgba(220, 38, 38, 0); }
+      }
+
+      @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-pulse-border {
+        animation: pulse-border 2.5s infinite;
+      }
+      .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+      }
+    </style>
+</head>
+  <body class="text-stone-300">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
