@@ -6,9 +6,10 @@
   "homepage": "https://pportilla.github.io/strahd_campaign/",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/assert-no-client-secrets.cjs",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages-clean && gh-pages -d dist --repo git@github.com:pportilla/strahd_campaign.git --nojekyll --before-add ./scripts/clean-gh-pages.cjs"
+    "deploy": "npm run build && node scripts/prepare-gh-pages-dist.cjs && gh-pages-clean && gh-pages -d dist --repo git@github.com:pportilla/strahd_campaign.git --nojekyll --before-add ./scripts/clean-gh-pages.cjs"
   },
   "dependencies": {
     "@firebase/app": "0.14.6",

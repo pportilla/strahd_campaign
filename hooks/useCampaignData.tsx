@@ -57,10 +57,14 @@ export const useCampaignData = (): UseCampaignDataResult => {
   useEffect(() => {
     let playersUnsubscribe: (() => void) | undefined;
     let scheduleUnsubscribe: (() => void) | undefined;
+    const handleSubscriptionError = (err: unknown) => {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'No se pudo iniciar la sincronización en tiempo real.');
+    };
 
     try {
-      playersUnsubscribe = subscribeToPlayers(loadPlayers);
-      scheduleUnsubscribe = subscribeToSchedule(loadSchedule);
+      playersUnsubscribe = subscribeToPlayers(loadPlayers, handleSubscriptionError);
+      scheduleUnsubscribe = subscribeToSchedule(loadSchedule, handleSubscriptionError);
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : 'No se pudo iniciar la sincronización en tiempo real.');

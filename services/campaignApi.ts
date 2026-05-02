@@ -1,5 +1,5 @@
 import { collection, deleteDoc, doc, getDocs, onSnapshot, orderBy, query, setDoc, writeBatch } from '@firebase/firestore';
-import { db, isFirestoreReady } from './firebaseClient.ts';
+import { requireFirestoreDb } from './firebaseClient.ts';
 import { Availability, Player, PlayerId, Schedule } from '../types.ts';
 
 type PlayerDoc = Omit<Player, 'id'> & { id?: PlayerId };
@@ -9,15 +9,8 @@ interface ScheduleDoc {
   availability: Availability;
 }
 
-const ensureDb = () => {
-  if (!db || !isFirestoreReady) {
-    throw new Error('Firebase no está configurado. Añade las variables VITE_FIREBASE_* a tu entorno.');
-  }
-  return db;
-};
-
-const playersCollection = () => collection(ensureDb(), 'players');
-const scheduleCollection = () => collection(ensureDb(), 'scheduleEntries');
+const playersCollection = async () => collection(await requireFirestoreDb(), 'players');
+const scheduleCollection = async () => collection(await requireFirestoreDb(), 'scheduleEntries');
 
 const mapPlayers = (docs: PlayerDoc[], ids: string[]): Player[] => {
   return docs.map((data, index) => ({
@@ -41,7 +34,7 @@ const mapSchedule = (docs: ScheduleDoc[]): Schedule => {
 };
 
 export const fetchPlayers = async (): Promise<Player[]> => {
-  const playersQuery = query(playersCollection(), orderBy('id'));
+  const playersQuery = query(await playersCollection(), orderBy('id'));
   const snapshot = await getDocs(playersQuery);
   const docs = snapshot.docs.map(doc => doc.data() as PlayerDoc);
   const ids = snapshot.docs.map(doc => doc.id);
@@ -49,7 +42,7 @@ export const fetchPlayers = async (): Promise<Player[]> => {
 };
 
 export const fetchSchedule = async (): Promise<Schedule> => {
-  const snapshot = await getDocs(scheduleCollection());
+  const snapshot = await getDocs(await scheduleCollection());
   const docs = snapshot.docs.map(doc => doc.data() as ScheduleDoc);
   return mapSchedule(docs);
 };
@@ -60,7 +53,7 @@ export const upsertAvailability = async (
   status: Availability,
 ): Promise<void> => {
   if (!dates.length) return;
-  const dbRef = ensureDb();
+  const dbRef = await requireFirestoreDb();
   const batch = writeBatch(dbRef);
   dates.forEach(date => {
     const ref = doc(dbRef, 'scheduleEntries', `${date}_${playerId}`);
@@ -71,7 +64,7 @@ export const upsertAvailability = async (
 
 export const removeAvailability = async (dates: string[], playerId: PlayerId): Promise<void> => {
   if (!dates.length) return;
-  const dbRef = ensureDb();
+  const dbRef = await requireFirestoreDb();
   const batch = writeBatch(dbRef);
   dates.forEach(date => {
     const ref = doc(dbRef, 'scheduleEntries', `${date}_${playerId}`);
@@ -81,7 +74,7 @@ export const removeAvailability = async (dates: string[], playerId: PlayerId): P
 };
 
 export const updatePlayer = async (player: Player): Promise<void> => {
-  const ref = doc(playersCollection(), player.id);
+  const ref = doc(await playersCollection(), player.id);
   await setDoc(ref, {
     id: player.id,
     name: player.name,
@@ -94,10 +87,40 @@ export const updatePlayer = async (player: Player): Promise<void> => {
   }, { merge: true });
 };
 
-export const subscribeToPlayers = (callback: () => void) => {
-  return onSnapshot(playersCollection(), () => { callback(); });
+export const subscribeToPlayers = (callback: () => void, onError?: (error: unknown) => void) => {
+  let unsubscribe: (() => void) | undefined;
+  let isCancelled = false;
+
+  void playersCollection()
+    .then(playersRef => {
+      if (isCancelled) return;
+      unsubscribe = onSnapshot(playersRef, () => { callback(); });
+    })
+    .catch(error => {
+      if (!isCancelled) onError?.(error);
+    });
+
+  return () => {
+    isCancelled = true;
+    unsubscribe?.();
+  };
 };
 
-export const subscribeToSchedule = (callback: () => void) => {
-  return onSnapshot(scheduleCollection(), () => { callback(); });
+export const subscribeToSchedule = (callback: () => void, onError?: (error: unknown) => void) => {
+  let unsubscribe: (() => void) | undefined;
+  let isCancelled = false;
+
+  void scheduleCollection()
+    .then(scheduleRef => {
+      if (isCancelled) return;
+      unsubscribe = onSnapshot(scheduleRef, () => { callback(); });
+    })
+    .catch(error => {
+      if (!isCancelled) onError?.(error);
+    });
+
+  return () => {
+    isCancelled = true;
+    unsubscribe?.();
+  };
 };

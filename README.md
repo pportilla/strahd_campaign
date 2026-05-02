@@ -142,17 +142,21 @@ Use Firebase only if you want a fast hosted setup with shared updates.
 1. Create a Firebase project.
 2. Create a Web App in that project.
 3. Enable Firestore.
-4. Copy `.env.example` to `.env.local`.
+4. Copy `public/firebase-config.example.json` to `public/firebase-config.json`.
 5. Fill in the values from your Firebase Web App config:
 
-```bash
-VITE_FIREBASE_API_KEY=""
-VITE_FIREBASE_AUTH_DOMAIN=""
-VITE_FIREBASE_PROJECT_ID=""
-VITE_FIREBASE_STORAGE_BUCKET=""
-VITE_FIREBASE_MESSAGING_SENDER_ID=""
-VITE_FIREBASE_APP_ID=""
+```json
+{
+  "apiKey": "",
+  "authDomain": "",
+  "projectId": "",
+  "storageBucket": "",
+  "messagingSenderId": "",
+  "appId": ""
+}
 ```
+
+`public/firebase-config.json` is ignored by git and is only for local development. The deploy script removes `dist/firebase-config.json` before publishing to `gh-pages`, so Firebase config does not get committed into the repository history.
 
 Create these collections:
 

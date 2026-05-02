@@ -11,14 +11,14 @@ import {
   orderBy,
   writeBatch
 } from '@firebase/firestore';
-import { db } from './firebaseClient';
+import { requireFirestoreDb } from './firebaseClient';
 import { WikiPage, WikiHistoryEntry, PlayerId, WikiCategory } from '../types';
 
 const WIKI_COLLECTION = 'wiki';
 
 export const wikiService = {
   async getAllPages(): Promise<WikiPage[]> {
-    if (!db) throw new Error('Firestore not initialized');
+    const db = await requireFirestoreDb();
     
     const snapshot = await getDocs(collection(db, WIKI_COLLECTION));
     return snapshot.docs.map(doc => {
@@ -32,7 +32,7 @@ export const wikiService = {
   },
 
   async getPage(slug: string): Promise<WikiPage | null> {
-    if (!db) throw new Error('Firestore not initialized');
+    const db = await requireFirestoreDb();
     
     const docRef = doc(db, WIKI_COLLECTION, slug);
     const docSnap = await getDoc(docRef);
@@ -49,7 +49,7 @@ export const wikiService = {
   },
 
   async getPageHistory(slug: string): Promise<WikiHistoryEntry[]> {
-    if (!db) throw new Error('Firestore not initialized');
+    const db = await requireFirestoreDb();
     
     const historyRef = collection(db, WIKI_COLLECTION, slug, 'history');
     const q = query(historyRef, orderBy('timestamp', 'desc'));
@@ -62,7 +62,7 @@ export const wikiService = {
   },
 
   async savePage(slug: string, title: string, content: string, category: WikiCategory, playerId: PlayerId): Promise<void> {
-    if (!db) throw new Error('Firestore not initialized');
+    const db = await requireFirestoreDb();
     
     const timestamp = Timestamp.now();
     const docRef = doc(db, WIKI_COLLECTION, slug);
@@ -101,7 +101,7 @@ export const wikiService = {
   },
 
   async deletePage(slug: string): Promise<void> {
-    if (!db) throw new Error('Firestore not initialized');
+    const db = await requireFirestoreDb();
     
     const batch = writeBatch(db);
     
@@ -121,7 +121,7 @@ export const wikiService = {
   },
 
   async renamePage(oldSlug: string, newSlug: string): Promise<void> {
-    if (!db) throw new Error('Firestore not initialized');
+    const db = await requireFirestoreDb();
     
     // 1. Check if new slug already exists
     const newDocRef = doc(db, WIKI_COLLECTION, newSlug);
