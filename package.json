@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist --repo git@github.com:pportilla/strahd_campaign.git"
+    "deploy": "npm run build && gh-pages-clean && gh-pages -d dist --repo git@github.com:pportilla/strahd_campaign.git --nojekyll --before-add ./scripts/clean-gh-pages.cjs"
   },
   "dependencies": {
     "@firebase/app": "0.14.6",
