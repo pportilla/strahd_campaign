@@ -56,13 +56,22 @@ npm run preview
 
 ## Deploy
 
-The included deploy script publishes `dist/` to GitHub Pages:
+Deployments are handled by GitHub Actions in `.github/workflows/deploy-pages.yml`.
+On every push to `main`, the workflow:
 
-```bash
-npm run deploy
-```
+- installs dependencies
+- writes `public/firebase-config.json` from the `FIREBASE_CONFIG_JSON` repository secret
+- builds the Vite app
+- validates that Firebase config is only present as `dist/firebase-config.json`
+- uploads `dist/` as a GitHub Pages artifact
 
-Update `homepage` and the `deploy` script in `package.json` if your repository name or remote is different.
+For the first setup, open the GitHub repository and go to:
+
+1. `Settings` -> `Pages`.
+2. Under `Build and deployment`, set `Source` to `GitHub Actions`.
+3. Save.
+
+Local `npm run deploy` only builds and validates the Pages artifact. The real publish happens from GitHub Actions after pushing to `main`, or by manually running the `Deploy GitHub Pages` workflow.
 
 ## Customizing The Campaign
 
@@ -156,7 +165,35 @@ Use Firebase only if you want a fast hosted setup with shared updates.
 }
 ```
 
-`public/firebase-config.json` is ignored by git and is only for local development. The deploy script removes `dist/firebase-config.json` before publishing to `gh-pages`, so Firebase config does not get committed into the repository history.
+`public/firebase-config.json` is ignored by git and is only for local development.
+
+For GitHub Pages, add the runtime config as a GitHub Actions secret instead of committing it:
+
+1. Open the GitHub repository.
+2. Go to `Settings` -> `Secrets and variables` -> `Actions`.
+3. Click `New repository secret`.
+4. Use this name:
+
+```text
+FIREBASE_CONFIG_JSON
+```
+
+5. Paste the full Firebase Web App config JSON as the value:
+
+```json
+{
+  "apiKey": "...",
+  "authDomain": "...",
+  "projectId": "...",
+  "storageBucket": "...",
+  "messagingSenderId": "...",
+  "appId": "..."
+}
+```
+
+6. Click `Add secret`.
+
+The deployed site serves this generated file at `/strahd_campaign/firebase-config.json`. That file is visible to browsers, which is expected for Firebase Web apps, but it is not committed to `main` or `gh-pages` history.
 
 Create these collections:
 
@@ -253,8 +290,9 @@ If your database stores dates as strings instead of Firestore timestamps, update
 ```bash
 npm run dev      # local development server
 npm run build    # production build
+npm run validate:pages # validate generated GitHub Pages files
 npm run preview  # preview the production build
-npm run deploy   # publish dist/ to GitHub Pages
+npm run deploy   # local build plus Pages artifact validation
 ```
 
 ## Notes

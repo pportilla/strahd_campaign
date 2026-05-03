@@ -8,8 +8,9 @@
     "dev": "vite",
     "prebuild": "node scripts/assert-no-client-secrets.cjs",
     "build": "vite build",
+    "validate:pages": "node scripts/validate-pages-artifact.cjs",
     "preview": "vite preview",
-    "deploy": "npm run build && node scripts/prepare-gh-pages-dist.cjs && gh-pages-clean && gh-pages -d dist --repo git@github.com:pportilla/strahd_campaign.git --nojekyll --before-add ./scripts/clean-gh-pages.cjs"
+    "deploy": "npm run build && npm run validate:pages"
   },
   "dependencies": {
     "@firebase/app": "0.14.6",
@@ -24,7 +25,6 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^5.1.1",
-    "gh-pages": "^6.3.0",
     "typescript": "^5.6.3",
     "vite": "^7.2.2"
   }

@@ -16,8 +16,8 @@ const sourceExtensions = new Set(['.cjs', '.html', '.js', '.jsx', '.ts', '.tsx']
 const ignoredDirectories = new Set(['.git', 'dist', 'node_modules']);
 const ignoredFiles = new Set([
   path.join(root, 'scripts', 'assert-no-client-secrets.cjs'),
-  path.join(root, 'scripts', 'clean-gh-pages.cjs'),
-  path.join(root, 'scripts', 'prepare-gh-pages-dist.cjs'),
+  path.join(root, 'scripts', 'validate-firebase-config.cjs'),
+  path.join(root, 'scripts', 'validate-pages-artifact.cjs'),
 ]);
 
 function* walk(directory) {
